@@ -38,6 +38,7 @@ import heros.journey.screens.LoadingScreen;
  * Fog of War
  * Add Day/Night Cycle (could be used to show the world itself is getting darker not day/night)
  * Add time
+ * Saving
  * Map Generation
  * 	Generate Dungeons on world map
  * 	Improve road generation some towns roads loop too much

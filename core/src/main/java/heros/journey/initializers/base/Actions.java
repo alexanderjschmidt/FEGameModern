@@ -13,7 +13,7 @@ public class Actions implements InitializerInterface {
     public static Action wait, end_turn, exit_game, attack;
 
 	static {
-		end_turn = new Action("End Turn", true) {
+		/*end_turn = new Action("End Turn", true) {
 			@Override
 			public void onSelect(GameState gameState, Entity selected) {
 				gameState.nextTurn();
@@ -23,7 +23,7 @@ public class Actions implements InitializerInterface {
 			public boolean requirementsMet(GameState gameState, Entity selected) {
 				return true;
 			}
-		};
+		};*/
         exit_game = new Action("Exit Game", true) {
 			@Override
 			public void onSelect(GameState gameState, Entity selected) {
@@ -38,7 +38,6 @@ public class Actions implements InitializerInterface {
         wait = new Action("Wait") {
 			@Override
 			public void onSelect(GameState gameState, Entity selected) {
-				HUD.get().getCursor().clearSelected(true);
 			}
 
 			@Override

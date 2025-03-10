@@ -1,17 +1,13 @@
 package heros.journey.utils;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.graphics.g2d.Batch;
-
 import heros.journey.GameCamera;
 import heros.journey.GameState;
 import heros.journey.entities.Entity;
-import heros.journey.entities.Team;
-import heros.journey.entities.buffs.Buff;
-import heros.journey.entities.buffs.BuffManager;
 import heros.journey.ui.HUD;
 import heros.journey.utils.art.ResourceManager;
+
+import java.util.ArrayList;
 
 public class RangeManager {
 
@@ -32,6 +28,7 @@ public class RangeManager {
 		clearRange();
 	}
 
+    // This shouldnt be necessary since this is a purely visual class
 	public RangeManager clone(GameState newGameState) {
 		return new RangeManager(newGameState, width, height);
 	}
@@ -48,7 +45,7 @@ public class RangeManager {
 				// System.out.print(range[x][y]);
 				if (range[x][y] == rangeType) {
 					Entity e = gameState.getEntities().get(x, y);
-					if (e != null && ((enemies && e.getTeam() != selected.getTeam()) || (!enemies && e.getTeam() == selected.getTeam()))) {
+					if (e != null) {
 						targets.add(e);
 					}
 				}
@@ -82,8 +79,8 @@ public class RangeManager {
 			// System.out.println("out of bounds");
 			return;
 		}
-		if (dist < 0 || (gameState.getEntities().get(x, y) != null && gameState.getEntities().get(x, y).getTeam() != selected.getTeam())) {
-			return;
+		if ((dist < 0 || gameState.getEntities().get(x, y) != null) && gameState.getEntities().get(x, y) != selected) {
+            return;
 		}
 		range[x][y] = RangeColor.BLUE;
 		setDistanceRangeAt(x, y, selected.getRanges(), RangeColor.RED);
@@ -112,7 +109,7 @@ public class RangeManager {
 		}
 	}
 
-	public void render(Batch batch, int turn, Team activeTeam) {
+	public void render(Batch batch, int turn) {
 		if (range == null) {
 			System.out.println("Range null");
 			return;

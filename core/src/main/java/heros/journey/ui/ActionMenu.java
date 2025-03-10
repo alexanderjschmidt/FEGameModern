@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import heros.journey.GameState;
 import heros.journey.entities.Entity;
 import heros.journey.entities.actions.Action;
+import heros.journey.entities.actions.TargetAction;
 import heros.journey.utils.art.ResourceManager;
 
 public class ActionMenu extends UI {
@@ -22,7 +23,7 @@ public class ActionMenu extends UI {
 		GameState.global().getRangeManager().clearRange();
         HUD.get().setState(HUD.HUDState.ACTION_SELECT);
 		if (options.isEmpty()) {
-            HUD.get().getCursor().clearSelected(false);
+            HUD.get().getCursor().clearSelected();
             HUD.get().setState(HUD.HUDState.CURSOR_MOVE);
 			return;
 		}
@@ -66,6 +67,9 @@ public class ActionMenu extends UI {
 
 	public void select() {
 		options.get(selected).onSelect(GameState.global(), HUD.get().getCursor().getSelected() == null ? new Entity(HUD.get().getCursor().x, HUD.get().getCursor().y) : HUD.get().getCursor().getSelected());
+        if (!(options.get(selected) instanceof TargetAction)) {
+            GameState.global().nextTurn();
+        }
 	}
 
 	public Action getSelected() {

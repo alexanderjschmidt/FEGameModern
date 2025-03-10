@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import heros.journey.*;
-import heros.journey.entities.ai.AIManager;
+import heros.journey.entities.actions.ActionQueue;
 import heros.journey.tilemap.MapData;
 import heros.journey.ui.HUD;
 import heros.journey.utils.input.InputManager;
@@ -14,7 +14,6 @@ import heros.journey.utils.worldgen.NewMapManager;
 public class BattleScreen implements Screen {
 
 	private Application app;
-	private AIManager ai;
 	private SpriteBatch batch;
 
 	private MapData mapData;
@@ -23,7 +22,7 @@ public class BattleScreen implements Screen {
 	// quickStart constructor
 	public BattleScreen(Application app, boolean quickStart) {
 		this.app = app;
-		this.mapData = new MapData((int) (Math.random() * 10000000), 128, 100, 1, false);
+		this.mapData = new MapData((int) (Math.random() * 10000000), 32, 2, false);
 		startGame();
 	}
 
@@ -36,7 +35,7 @@ public class BattleScreen implements Screen {
 	// server create game
 	public BattleScreen(Application app, int seed, int mapSize, int armySize, int teamCount, boolean fogOfWar) {
 		this.app = app;
-		this.mapData = ActionQueue.get().initSocket((int) (Math.random() * 10000000), 16, 100, 4, false, true);
+		this.mapData = ActionQueue.get().initSocket((int) (Math.random() * 10000000), 16, 4, false, true);
 	}
 
 	public void startGame() {
@@ -44,13 +43,10 @@ public class BattleScreen implements Screen {
 
 		GameState.global().init(mapData);
         NewMapManager.get().initGameState(GameState.global());
-
-		ai = new AIManager();
-
-		HUD.get().getCursor().setPosition(10, 15);
+        GameState.global().nextTurn();
 
 		ready = true;
-		ActionQueue.get().checkLocked();
+		//ActionQueue.get().checkLocked();
 	}
 
 	@Override
@@ -65,7 +61,6 @@ public class BattleScreen implements Screen {
 		app.getViewport().setCamera(GameCamera.get());
 		batch.setProjectionMatrix(GameCamera.get().combined);
 
-		ai.update(GameState.global(), delta);
 		InputManager.get().update(delta);
 		HUD.get().update(delta);
 
@@ -75,6 +70,8 @@ public class BattleScreen implements Screen {
 		batch.end();
 
 		HUD.get().draw();
+
+        ActionQueue.get().update();
 	}
 
 	@Override

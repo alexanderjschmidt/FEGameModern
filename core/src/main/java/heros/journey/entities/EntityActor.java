@@ -1,20 +1,18 @@
 package heros.journey.entities;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.utils.Timer;
-
-import heros.journey.ActionQueue;
+import heros.journey.entities.actions.ActionQueue;
 import heros.journey.GameCamera;
 import heros.journey.GameState;
 import heros.journey.entities.actions.Action;
 import heros.journey.entities.actions.TargetAction;
 import heros.journey.initializers.base.Actions;
 import heros.journey.utils.Direction;
-import heros.journey.utils.pathfinding.Cell;
+import heros.journey.utils.ai.pathfinding.Cell;
 
 public class EntityActor extends Actor {
 
@@ -24,10 +22,7 @@ public class EntityActor extends Actor {
     public Direction dir = Direction.SOUTH;
     protected float elapsedTime = 0;
 
-    private Team team;
-
     private GameState gameState;
-    public boolean used;
 
 	private Cell path;
 	private Action action;
@@ -38,9 +33,8 @@ public class EntityActor extends Actor {
         setSelected("idleSOUTH");
 	}
 
-	public EntityActor(Team team) {
+	public EntityActor() {
 		this(0, 0);
-        this.team = team;
 	}
 
 	public void render(Batch batch, float deltaTime) {
@@ -52,11 +46,7 @@ public class EntityActor extends Actor {
         this.act(deltaTime);
         elapsedTime += deltaTime;
 
-        if (used) {
-            batch.setColor(Color.GRAY);
-        } else {
-            batch.setColor(this.getColor());
-        }
+        batch.setColor(this.getColor());
 	}
 
 	private void setSelected(String selected) {
@@ -115,7 +105,7 @@ public class EntityActor extends Actor {
                                     }, 1f);
                                 }
                                 ActionQueue.get().nextAction();
-                                ActionQueue.get().checkLocked();
+                                //ActionQueue.get().checkLocked();
                             }
                         }
                     }
@@ -143,14 +133,6 @@ public class EntityActor extends Actor {
 
     public GameState getGameState() {
         return gameState;
-    }
-
-    public Team getTeam() {
-        return team;
-    }
-
-    public void setTeam(Team team) {
-        this.team = team;
     }
 
     public int getXCoord() {

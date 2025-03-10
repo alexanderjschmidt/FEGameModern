@@ -1,27 +1,40 @@
 package heros.journey.initializers.base;
 
+import java.util.concurrent.Callable;
+
 import com.badlogic.gdx.math.Vector2;
+
+import heros.journey.entities.actions.ActionQueue;
 import heros.journey.GameState;
-import heros.journey.utils.worldgen.NewMapManager;
 import heros.journey.entities.Entity;
+import heros.journey.entities.ai.MCTSAI;
+import heros.journey.entities.ai.PlayerAI;
+import heros.journey.entities.factions.Faction;
 import heros.journey.initializers.InitializerInterface;
 import heros.journey.tilemap.tiles.ActionTile;
 import heros.journey.tilemap.tiles.Tile;
-import heros.journey.utils.pathfinding.AStar;
-import heros.journey.utils.pathfinding.Cell;
+import heros.journey.utils.ai.pathfinding.AStar;
+import heros.journey.utils.ai.pathfinding.Cell;
 import heros.journey.utils.worldgen.CellularAutomata;
 import heros.journey.utils.worldgen.MapGenerationEffect;
-
-import java.util.concurrent.Callable;
+import heros.journey.utils.worldgen.NewMapManager;
 
 public class Map implements InitializerInterface {
 
     static {
-        Entity player = new Entity(Classes.hero, GameState.global().getPlayerTeam());
+        Faction playerFaction = new Faction(ActionQueue.get().getID(), true);
+
+        Entity player = new Entity(Classes.hero, new PlayerAI(new MCTSAI()));
         player.setMapPosition(16, 16);
         player.getInventory().add(Items.wood);
         player.getInventory().add(Items.ironOre);
+        player.getFactions().add(playerFaction);
+
+        Entity goblin = new Entity(Classes.goblin, new MCTSAI());
+        goblin.setMapPosition(20, 20);
+
         NewMapManager.get().getStartingEntities().add(player);
+        NewMapManager.get().getStartingEntities().add(goblin);
 
         // Generated Map
         new MapGenerationEffect() {

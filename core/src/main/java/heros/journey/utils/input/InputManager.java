@@ -1,20 +1,25 @@
 package heros.journey.utils.input;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.badlogic.gdx.Gdx;
-import heros.journey.*;
+
+import heros.journey.entities.actions.ActionQueue;
+import heros.journey.GameCamera;
+import heros.journey.GameState;
+import heros.journey.Random;
 import heros.journey.entities.actions.ActionManager;
 import heros.journey.entities.actions.TargetAction;
 import heros.journey.ui.Cursor;
 import heros.journey.ui.HUD;
 import heros.journey.ui.HUD.HUDState;
-import heros.journey.utils.pathfinding.AStar;
-import heros.journey.utils.pathfinding.Cell;
+import heros.journey.utils.ai.pathfinding.AStar;
+import heros.journey.utils.ai.pathfinding.Cell;
 import heros.journey.utils.worldgen.NewMapManager;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class InputManager {
 
@@ -112,23 +117,26 @@ public class InputManager {
 				sendAction();
 				cursor.getActiveSkill().targetEffect(gameState, cursor.getSelected(), cursor.x, cursor.y);
 				HUD.get().setState(HUDState.CURSOR_MOVE);
+                GameState.global().nextTurn();
 			} else if (Gdx.input.isKeyJustPressed(KeyManager.ESCAPE) || Gdx.input.isKeyJustPressed(KeyManager.BACK)) {
 				cursor.revertAction();
 			}
 		}
-
 	}
 
 	private void updateMoveState(float delta) {
+        if (Gdx.input.isKeyJustPressed(KeyManager.NEXT_CHARACTER)) {
+            cursor.setPosition(GameState.global().getEntities().getCurrentEntity());
+        }
 		if ((Gdx.input.isKeyJustPressed(KeyManager.ESCAPE) || Gdx.input.isKeyJustPressed(KeyManager.BACK)) && cursor.getSelected() != null) {
-			cursor.clearSelected(false);
+			cursor.clearSelected();
 		} else if (Gdx.input.isKeyJustPressed(KeyManager.ESCAPE) || Gdx.input.isKeyJustPressed(KeyManager.BACK)) {
 			HUD.get().getActionMenu().open(ActionManager.getTeamActions(gameState, cursor.x, cursor.y));
 		} else if (Gdx.input.isKeyJustPressed(KeyManager.SELECT)) {
 			if (cursor.getSelected() != null) {
 				savePath();
 				cursor.moveSelected();
-			} else if (cursor.getHover() != null && cursor.getHover().getTeam() == gameState.getActiveTeam() && !cursor.getHover().used) {
+			} else if (cursor.getHover() != null) {
 				cursor.setSelectedtoHover();
 				HUD.get().select();
 				if (cursor.getHover().getMoveDistance() == 0) {
@@ -141,8 +149,6 @@ public class InputManager {
 				savePath();
 				HUD.get().getActionMenu().open(ActionManager.getTeamActions(gameState, cursor.x, cursor.y));
 			}
-		} else if (Gdx.input.isKeyJustPressed(KeyManager.NEXT_CHARACTER)) {
-			gameState.getEntities().nextCharacter(cursor.x, cursor.y);
 		}
 		updateFreeMove(delta);
 	}

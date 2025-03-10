@@ -1,28 +1,27 @@
-package heros.journey;
+package heros.journey.entities.actions;
 
-import heros.journey.entities.Entity;
-import heros.journey.entities.Team;
-import heros.journey.entities.actions.Action;
-import heros.journey.entities.actions.ActionManager;
-import heros.journey.tilemap.MapData;
-import heros.journey.ui.HUD;
-import heros.journey.ui.HUD.HUDState;
-import heros.journey.entities.actions.QueuedAction;
-import heros.journey.utils.pathfinding.Cell;
-import io.socket.client.IO;
-import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
+import java.util.ArrayList;
+import java.util.UUID;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+import heros.journey.GameState;
+import heros.journey.entities.Entity;
+import heros.journey.tilemap.MapData;
+import heros.journey.ui.HUD;
+import heros.journey.ui.HUD.HUDState;
+import heros.journey.utils.ai.pathfinding.Cell;
+import io.socket.client.IO;
+import io.socket.client.Socket;
+import io.socket.emitter.Emitter;
 
 public class ActionQueue extends ArrayList<QueuedAction> {
 
 	private boolean actionInProgress;
 
-	private String id = null;
+	private String id = String.valueOf(UUID.randomUUID());
 	private static ActionQueue actionQueue;
 	private GameState gameState;
 
@@ -40,11 +39,11 @@ public class ActionQueue extends ArrayList<QueuedAction> {
 	}
 
 	public MapData initSocket(boolean gameCreator) {
-		return initSocket(0, 0, 0, 0, false, gameCreator);
+		return initSocket(0, 0, 0, false, gameCreator);
 	}
 
-	public MapData initSocket(int seed, int mapSize, int armySize, int teamCount, boolean fogOfWar, boolean gameCreator) {
-		final MapData mapData = new MapData(seed, mapSize, armySize, teamCount, fogOfWar);
+	public MapData initSocket(int seed, int mapSize, int teamCount, boolean fogOfWar, boolean gameCreator) {
+		final MapData mapData = new MapData(seed, mapSize, teamCount, fogOfWar);
 		this.gameCreator = gameCreator;
 		try {
 			socket = IO.socket("http://35.174.146.31:3000");
@@ -71,7 +70,6 @@ public class ActionQueue extends ArrayList<QueuedAction> {
 					try {
 						gameInfo.put("seed", seed);
 						gameInfo.put("mapSize", mapSize);
-						gameInfo.put("armySize", armySize);
 						gameInfo.put("teamCount", teamCount);
 						gameInfo.put("fogOfWar", fogOfWar);
 					} catch (JSONException e) {
@@ -95,7 +93,7 @@ public class ActionQueue extends ArrayList<QueuedAction> {
 				System.out.println(players.toString());
 				JSONObject.getNames(players);
 				for (int i = 0; i < JSONObject.getNames(players).length; i++) {
-					GameState.global().getTeams().add(new Team(JSONObject.getNames(players)[i], i, GameState.global(), false));
+
 				}
 				// TODO
 				// startGame();
@@ -136,7 +134,6 @@ public class ActionQueue extends ArrayList<QueuedAction> {
 					e.printStackTrace();
 				}
 				System.out.println(pid + " disconnected");
-				GameState.global().removeTeam(pid);
 			}
 		}).on("ping", new Emitter.Listener() {
 			@Override
@@ -147,42 +144,27 @@ public class ActionQueue extends ArrayList<QueuedAction> {
 		return mapData;
 	}
 
-	public void checkLocked() {
-		if (id == null) {
-			if (gameState.getActiveTeam().isAI()) {
-				HUD.get().setState(HUD.HUDState.LOCKED);
-			} else {
-				HUD.get().setState(HUD.HUDState.CURSOR_MOVE);
-			}
-		} else if (gameState.getActiveTeam().getID().equals(id)) {
-			HUD.get().setState(HUD.HUDState.CURSOR_MOVE);
-		} else {
-			HUD.get().setState(HUD.HUDState.LOCKED);
-		}
-	}
+    public void update(){
+        if (actionInProgress)
+            return;
+        nextAction();
+    }
 
 	public void nextAction() {
 		if (actionQueue.size() == 0) {
 			// System.out.println("end of queue");
 			return;
 		}
-		QueuedAction action = actionQueue.remove(0);
+		QueuedAction action = actionQueue.removeFirst();
+        System.out.println("process action " + action);
 		actionInProgress = true;
-		// System.out.println("Skill: " + action.getSkill());
 		Cell path = action.getPath();
-		if (gameState.getEntities().getFog(path.i, path.j) == null) {
-			Entity e = new Entity(path.i, path.j);
-			action.getAction().onSelect(gameState, e);
-			endAction();
-			nextAction();
-			checkLocked();
-			return;
-		}
+
 		HUD.get().setState(HUDState.MOVING);
 		Entity selected = gameState.getEntities().get(path.i, path.j);
 		HUD.get().getCursor().setSelected(selected);
 		selected.move(path, action.getAction(), action.getTargetX(), action.getTargetY());
-		checkLocked();
+        GameState.global().nextTurn();
 	}
 
 	public void addAction(QueuedAction action) {

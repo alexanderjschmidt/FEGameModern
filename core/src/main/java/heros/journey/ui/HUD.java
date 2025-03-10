@@ -102,6 +102,7 @@ public class HUD extends Stage {
 	}
 
 	public void setState(HUDState state) {
+        System.out.println(state);
 		this.state = state;
 	}
 

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import heros.journey.GameCamera;
 
+// WHAT IS THIS??
 public class Effect {
 
 	public static final float SCALE = 2f;
@@ -13,7 +14,7 @@ public class Effect {
 	// (Camera.get().getSize() * SCALE / 2f);
 	private float x, y;
 	private Vector2 v;
-	private Animation<TextureRegion> ani;
+	private final Animation<TextureRegion> ani;
 	private float elapsedTime;
 	private boolean angle;
 

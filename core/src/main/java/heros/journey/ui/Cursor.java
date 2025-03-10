@@ -9,14 +9,11 @@ import heros.journey.GameCamera;
 import heros.journey.GameState;
 import heros.journey.entities.Entity;
 import heros.journey.entities.actions.TargetAction;
-import heros.journey.entities.buffs.Buff;
-import heros.journey.entities.buffs.BuffManager;
 import heros.journey.utils.RangeManager.RangeColor;
 import heros.journey.utils.art.ResourceManager;
 import heros.journey.ui.HUD.HUDState;
-import heros.journey.utils.input.Options;
-import heros.journey.utils.pathfinding.AStar;
-import heros.journey.utils.pathfinding.Cell;
+import heros.journey.utils.ai.pathfinding.AStar;
+import heros.journey.utils.ai.pathfinding.Cell;
 
 public class Cursor {
 	// coords
@@ -52,18 +49,13 @@ public class Cursor {
 		}
 	}
 
-	public void clearSelected(boolean markedUsed) {
-		selected.used = markedUsed;
-		hud.setState(HUDState.CURSOR_MOVE);
+	public void clearSelected() {
 		selected = null;
 		sx = -1;
 		sy = -1;
 		path = null;
 		GameState.global().getRangeManager().clearRange();
 		hud.clearSelect();
-        if(Options.AUTO_END_TURN){
-            GameState.global().endTurn();
-        }
 	}
 
 	public void render(Batch batch, float delta) {
@@ -147,11 +139,15 @@ public class Cursor {
 			batch.draw(ResourceManager.get().ui[2][1], c.i * GameCamera.get().getSize(), c.j * GameCamera.get().getSize(), 0, 0, GameCamera.get().getSize(), GameCamera.get().getSize(), 1f, 1f, 0);
 	}
 
-	public void setPosition(int i, int j) {
-		x = i;
-		y = j;
-		update(0);
-	}
+    public void setPosition(int i, int j) {
+        x = i;
+        y = j;
+        update(0);
+    }
+
+    public void setPosition(Entity e) {
+        this.setPosition(e.getXCoord(), e.getYCoord());
+    }
 
 	public Entity getSelected() {
 		return selected;
@@ -164,7 +160,7 @@ public class Cursor {
 		}
 		Entity e = GameState.global().getEntities().removeEntity(sx, sy);
 		GameState.global().getEntities().addEntity(e, initialX, initialY);
-		clearSelected(false);
+		clearSelected();
 		if (e.getMoveDistance() != 0) {
 			update(0);
 			setSelectedtoHover();

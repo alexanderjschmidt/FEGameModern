@@ -1,6 +1,6 @@
 package heros.journey.entities.actions;
 
-import heros.journey.utils.pathfinding.Cell;
+import heros.journey.utils.ai.pathfinding.Cell;
 
 public class QueuedAction {
 

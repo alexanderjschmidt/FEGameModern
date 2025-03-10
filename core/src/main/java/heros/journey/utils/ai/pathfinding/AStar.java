@@ -1,4 +1,4 @@
-package heros.journey.utils.pathfinding;
+package heros.journey.utils.ai.pathfinding;
 
 import java.util.PriorityQueue;
 
